@@ -792,7 +792,10 @@ function renderCollectionsBoard() {
       group: { name: 'collections', pull: 'clone', put: false },
       animation: 150,
       ghostClass: 'sortable-ghost',
-      sort: false
+      sort: false,
+      delay: 300,
+      delayOnTouchOnly: true,
+      touchStartThreshold: 8
     });
 
     board.querySelectorAll('.board-container-vertical .board-column-list').forEach(list => {
@@ -800,8 +803,9 @@ function renderCollectionsBoard() {
         group: 'collections',
         animation: 150,
         ghostClass: 'sortable-ghost',
-        delay: 200,
+        delay: 300,
         delayOnTouchOnly: true,
+        touchStartThreshold: 8,
         onAdd: async (evt) => {
           const productId = evt.item.dataset.productId;
           const toColumnId = list.dataset.columnId;

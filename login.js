@@ -8,6 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorEl = document.getElementById('login-error');
   const apiBase = window.APP_CONFIG?.API_BASE_URL || '';
 
+  const passwordInput = document.getElementById('password');
+  const toggleBtn = document.getElementById('toggle-password-btn');
+  if (toggleBtn && passwordInput) {
+    const eyeClosedLine = toggleBtn.querySelector('.eye-closed');
+    toggleBtn.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      if (type === 'text') {
+        eyeClosedLine.classList.remove('hidden');
+      } else {
+        eyeClosedLine.classList.add('hidden');
+      }
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorEl.classList.add('hidden');
