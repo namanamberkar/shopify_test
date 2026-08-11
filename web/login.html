@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naari Saree Manager — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <h1 class="login-title">Naari</h1>
+    <p class="login-subtitle">Saree Shopify Manager</p>
+    <form id="login-form">
+      <label class="field-label" for="password">App password</label>
+      <input type="password" id="password" class="field-input" autocomplete="current-password" required>
+      <button type="submit" class="btn primary-btn full-width">Sign in</button>
+    </form>
+    <p id="login-error" class="error-text hidden"></p>
+  </div>
+  <script src="config.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

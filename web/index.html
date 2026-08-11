@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naari Saree Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div>
+        <h1 class="brand-title">Naari</h1>
+        <p class="brand-tagline">Saree Shopify Manager</p>
+      </div>
+      <div class="header-actions">
+        <span id="shop-status" class="status-pill">Checking...</span>
+        <button id="logout-btn" class="btn sync-btn">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="products">Products</button>
+      <button class="tab-btn" data-tab="new">New Saree</button>
+      <button class="tab-btn" data-tab="collections">Collections</button>
+    </nav>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Products tab -->
+    <section id="panel-products" class="tab-panel">
+      <div class="toolbar">
+        <input type="text" id="product-search" class="field-input" placeholder="Search by title, saree code, tags...">
+        <select id="product-filter-status" class="field-input">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+        <button id="refresh-products-btn" class="btn sync-btn">Refresh</button>
+      </div>
+      <div id="products-list" class="products-grid">
+        <p class="meta-note">Loading products...</p>
+      </div>
+    </section>
+
+    <!-- New Saree tab -->
+    <section id="panel-new" class="tab-panel hidden">
+      <form id="new-saree-form" class="product-form">
+        <div class="form-grid">
+          <div class="form-main">
+            <div class="form-card">
+              <h3 class="card-title">Basic Information</h3>
+              <label class="field-label" for="new-title">Title *</label>
+              <input type="text" id="new-title" class="field-input" required placeholder="e.g. Red Banarasi Silk Saree">
+
+              <label class="field-label" for="new-sku">Saree code (SKU) *</label>
+              <div class="sku-row">
+                <input type="text" id="new-sku" class="field-input" required autocomplete="off"
+                  placeholder="e.g. NB-1001">
+                <span id="new-sku-status" class="sku-status"></span>
+              </div>
+
+              <label class="field-label" for="new-description">Description</label>
+              <textarea id="new-description" class="field-input textarea" rows="5"
+                placeholder="Fabric details, dimensions, weaving style..."></textarea>
+            </div>
+
+            <div class="form-card">
+              <h3 class="card-title">Media</h3>
+              <label class="field-label" for="new-images">Upload Images</label>
+              <input type="file" id="new-images" class="field-input" accept="image/*" multiple>
+              <!-- Preview strip: thumbnails appear here after selection -->
+              <div id="new-images-preview" class="image-preview-strip"></div>
+            </div>
+          </div>
+
+          <div class="form-side">
+            <div class="form-card">
+              <h3 class="card-title">Pricing & Inventory</h3>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                  <label class="field-label" for="new-price">Price (₹)</label>
+                  <input type="number" id="new-price" class="field-input" min="0" step="0.01" value="0">
+                </div>
+                <div>
+                  <label class="field-label" for="new-compare-price">Compare at price (₹)</label>
+                  <input type="number" id="new-compare-price" class="field-input" min="0" step="0.01">
+                </div>
+              </div>
+
+              <label class="field-label" for="new-inventory" style="margin-top: 16px;">Overall Quantity</label>
+              <input type="number" id="new-inventory" class="field-input" min="0" step="1" value="1">
+
+              <label class="toggle-row">
+                <input type="checkbox" id="enable-variants">
+                <span>Enable multiple variants (e.g. Colors, Sizes)</span>
+              </label>
+
+              <div id="variants-panel" class="variants-panel" style="display: none;">
+                <label class="field-label" for="option-name" style="margin-top:0;">Option Name</label>
+                <input type="text" id="option-name" class="field-input" value="Color" placeholder="e.g. Color, Size">
+
+                <label class="field-label" style="margin-top:16px;">Option Values</label>
+                <div id="variants-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+                <button type="button" class="btn sync-btn" id="add-variant-btn" style="margin-top: 16px; width: 100%;">+
+                  Add Another Variant</button>
+              </div>
+
+              <label class="field-label" for="new-status" style="margin-top: 24px;">Status</label>
+              <select id="new-status" class="field-input">
+                <option value="draft">Draft (Hidden)</option>
+                <option value="active">Active (Visible)</option>
+              </select>
+
+              <label class="toggle-row" style="margin-top: 14px;">
+                <input type="checkbox" id="new-published">
+                <span>Publish to Online Store</span>
+              </label>
+            </div>
+
+            <div class="form-card">
+              <h3 class="card-title">Organization</h3>
+              <label class="field-label" for="new-vendor">Vendor</label>
+              <input type="text" id="new-vendor" class="field-input" value="Naari">
+
+              <label class="field-label" for="new-type">Product type</label>
+              <input type="text" id="new-type" class="field-input" value="Saree">
+
+              <label class="field-label" for="new-tags">Tags (comma separated)</label>
+              <input type="text" id="new-tags" class="field-input" placeholder="banarasi, silk, bridal">
+
+              <label class="field-label">Collections</label>
+              <div id="new-collections" class="checkbox-list">Loading collections...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3 class="card-title">Product Metafields</h3>
+          <div class="form-row">
+            <div>
+              <label class="field-label" for="mf-specifications">Specifications</label>
+              <input type="text" id="mf-specifications" class="field-input" placeholder="e.g. 5.5m saree + 0.8m blouse">
+            </div>
+            <div>
+              <label class="field-label" for="mf-fabric">Fabric</label>
+              <input type="text" id="mf-fabric" class="field-input" placeholder="e.g. Pure Silk">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="field-label" for="mf-care">Care</label>
+              <input type="text" id="mf-care" class="field-input" placeholder="e.g. Dry clean only">
+            </div>
+            <div>
+              <label class="field-label" for="mf-zari">Zari</label>
+              <input type="text" id="mf-zari" class="field-input" placeholder="e.g. Real gold zari">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="field-label" for="mf-fabric-weight">Fabric Weight</label>
+              <input type="text" id="mf-fabric-weight" class="field-input" placeholder="e.g. 800g">
+            </div>
+            <div>
+              <label class="field-label" for="mf-blouse-piece">Blouse Piece</label>
+              <input type="text" id="mf-blouse-piece" class="field-input" placeholder="e.g. Included">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="field-label" for="mf-length">Length</label>
+              <input type="text" id="mf-length" class="field-input" placeholder="e.g. 5.5 meters">
+            </div>
+            <div>
+              <label class="field-label" for="mf-origin">Origin</label>
+              <input type="text" id="mf-origin" class="field-input" placeholder="e.g. Varanasi">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="field-label" for="mf-weave-style">Weave Style</label>
+              <input type="text" id="mf-weave-style" class="field-input" placeholder="e.g. Katan">
+            </div>
+            <div>
+              <label class="field-label" for="mf-disclosures">Disclosures</label>
+              <input type="text" id="mf-disclosures" class="field-input" placeholder="e.g. Color may vary">
+            </div>
+          </div>
+          <label class="field-label" for="mf-instagram-url">Instagram URL</label>
+          <input type="url" id="mf-instagram-url" class="field-input" placeholder="https://instagram.com/p/...">
+        </div>
+        <button type="submit" class="btn primary-btn large-submit" id="new-submit-btn">Publish Saree to
+          Shopify</button>
+      </form>
+    </section>
+
+    <!-- Collections tab -->
+    <section id="panel-collections" class="tab-panel hidden">
+      <div class="toolbar" style="justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="new-collection-title" class="field-input" placeholder="New collection name"
+            style="width: 200px;">
+          <button id="create-collection-btn" class="btn primary-btn">+ Create</button>
+        </div>
+        <button id="refresh-collections-btn" class="btn sync-btn">Refresh board</button>
+      </div>
+      <div id="collections-board" class="collections-board-vertical">
+        <p class="meta-note">Loading collections board...</p>
+      </div>
+      <div id="smart-collections" class="smart-collections hidden"></div>
+    </section>
+  </div>
+
+  <!-- Edit modal -->
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-overlay" id="edit-modal-overlay"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="edit-modal-close">&times;</button>
+      <h2 class="modal-title">Edit saree</h2>
+      <form id="edit-form">
+        <input type="hidden" id="edit-id">
+        <input type="hidden" id="edit-variant-id">
+
+        <label class="field-label" for="edit-title">Title</label>
+        <input type="text" id="edit-title" class="field-input" required>
+
+        <label class="field-label" for="edit-sku">Saree code (SKU)</label>
+        <div class="sku-row">
+          <input type="text" id="edit-sku" class="field-input" required>
+          <span id="edit-sku-status" class="sku-status"></span>
+        </div>
+
+        <label class="field-label" for="edit-description">Description</label>
+        <textarea id="edit-description" class="field-input textarea" rows="4"></textarea>
+
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="edit-price">Base Price</label>
+            <input type="number" id="edit-price" class="field-input" min="0" step="0.01">
+          </div>
+          <div>
+            <label class="field-label" for="edit-inventory">Base Inventory</label>
+            <input type="number" id="edit-inventory" class="field-input" min="0" step="1">
+          </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <h4
+            style="font-family: 'Bodoni Moda', serif; font-size: 16px; color: var(--primary); padding-bottom: 8px; border-bottom: 1px solid var(--outline-variant); margin-bottom: 16px;">
+            Variants</h4>
+          <div id="edit-variants-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+
+        <label class="field-label" for="edit-status">Status</label>
+        <select id="edit-status" class="field-input">
+          <option value="draft">Draft</option>
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+        </select>
+
+        <label class="toggle-row" style="margin-top: 14px;">
+          <input type="checkbox" id="edit-published">
+          <span>Publish to Online Store</span>
+        </label>
+
+        <!-- Existing images gallery -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--outline-variant);">
+          <h4 style="font-family: 'Bodoni Moda', serif; font-size: 15px; color: var(--primary); margin-bottom: 12px;">
+            Photos</h4>
+          <div id="edit-images-list" class="edit-images-list"></div>
+          <label class="field-label" for="edit-new-images" style="margin-top: 16px;">Upload more photos</label>
+          <input type="file" id="edit-new-images" class="field-input" accept="image/*" multiple>
+          <div id="edit-new-images-preview" class="image-preview-strip"></div>
+        </div>
+
+        <!-- Product Metafields -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--outline-variant);">
+          <h4 style="font-family: 'Bodoni Moda', serif; font-size: 15px; color: var(--primary); margin-bottom: 12px;">
+            Product Metafields</h4>
+          <div class="form-row">
+            <div><label class="field-label" for="em-specifications">Specifications</label><input type="text"
+                id="em-specifications" class="field-input"></div>
+            <div><label class="field-label" for="em-fabric">Fabric</label><input type="text" id="em-fabric"
+                class="field-input"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label" for="em-care">Care</label><input type="text" id="em-care"
+                class="field-input"></div>
+            <div><label class="field-label" for="em-zari">Zari</label><input type="text" id="em-zari"
+                class="field-input"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label" for="em-fabric-weight">Fabric Weight</label><input type="text"
+                id="em-fabric-weight" class="field-input"></div>
+            <div><label class="field-label" for="em-blouse-piece">Blouse Piece</label><input type="text"
+                id="em-blouse-piece" class="field-input"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label" for="em-length">Length</label><input type="text" id="em-length"
+                class="field-input"></div>
+            <div><label class="field-label" for="em-origin">Origin</label><input type="text" id="em-origin"
+                class="field-input"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label" for="em-weave-style">Weave Style</label><input type="text"
+                id="em-weave-style" class="field-input"></div>
+            <div><label class="field-label" for="em-disclosures">Disclosures</label><input type="text"
+                id="em-disclosures" class="field-input"></div>
+          </div>
+          <label class="field-label" for="em-instagram-url">Instagram URL</label>
+          <input type="url" id="em-instagram-url" class="field-input">
+        </div>
+
+        <label class="field-label">Collections</label>
+        <div id="edit-collections" class="checkbox-list"></div>
+
+
+        <div class="modal-actions">
+          <button type="button" id="edit-delete-btn" class="btn danger-btn">Delete</button>
+          <button type="submit" class="btn primary-btn">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage collections modal -->
+  <div id="collections-modal" class="modal hidden">
+    <div class="modal-overlay" id="collections-modal-overlay"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="collections-modal-close">&times;</button>
+      <h2 class="modal-title">Manage Collections</h2>
+
+      <div id="collections-modal-product-info" class="modal-product-info">
+        <!-- Will be populated dynamically: image, title, sku -->
+      </div>
+
+      <div class="modal-search-wrapper">
+        <input type="text" id="collections-modal-search" class="field-input" placeholder="Search collections...">
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label class="field-label">Select Collections</label>
+        <div id="collections-modal-list" class="checkbox-list modal-checkbox-list">
+          <!-- Populated dynamically with checkboxes -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="collections-modal-cancel" class="btn">Cancel</button>
+        <button type="button" id="collections-modal-save" class="btn primary-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
