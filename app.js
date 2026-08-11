@@ -702,7 +702,7 @@ async function handleDeleteProduct() {
 
 function productCardHtml(product) {
   return `
-    <div class="board-card" data-product-id="${product.id}" title="Drag to a collection. Right-click or Double-click to manage collections.">
+    <div class="board-card" data-product-id="${product.id}" title="Right-click, Double-click, or Long-press to manage collections.">
       ${product.image ? `<img class="board-card-img" src="${escapeHtml(product.image)}" alt="">` : ''}
       <div>${escapeHtml(product.title)}</div>
       <div class="board-card-sku">${escapeHtml(product.sku || 'No SKU')}</div>
@@ -788,11 +788,14 @@ function renderCollectionsBoard() {
   `;
 
   if (window.Sortable) {
+    const isMobile = window.innerWidth <= 768;
+
     Sortable.create(document.getElementById('all-products-pool'), {
       group: { name: 'collections', pull: 'clone', put: false },
       animation: 150,
       ghostClass: 'sortable-ghost',
       sort: false,
+      disabled: isMobile,
       delay: 300,
       delayOnTouchOnly: true,
       touchStartThreshold: 8
@@ -803,6 +806,7 @@ function renderCollectionsBoard() {
         group: 'collections',
         animation: 150,
         ghostClass: 'sortable-ghost',
+        disabled: isMobile,
         delay: 300,
         delayOnTouchOnly: true,
         touchStartThreshold: 8,
